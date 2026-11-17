@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tableau de bord · Espace association · Dakar Propre &amp; Inclusif</title>
+<meta name="description" content="Espace de l’association Éco-Innov Dakar.">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-gabarit="asso" data-page="tableau">
+<div class="asso">
+  <main class="asso__page">
+    <div class="asso__titre"><div><span class="surtitre">Pilote · données d’exemple</span><h1>Tableau de bord</h1></div><div class="rangee"><button class="bouton bouton--contour" type="button" id="exporter">Exporter pour la commune</button></div></div>
+
+    <div class="kpis" id="kpis"></div>
+    <div class="deux-col">
+      <section class="panneau"><span class="surtitre">Recyclables vendus par semaine (kg)</span><div class="barres" id="barres"></div></section>
+      <section class="panneau"><div class="rangee entre" style="margin-bottom:6px"><span class="surtitre" style="color:var(--gris)">Derniers signalements</span><a class="lien" style="font-size:13px" href="asso-signalements.html">Tout voir →</a></div><div class="lignes" id="derniers"></div></section>
+    </div>
+    <section class="panneau"><div class="rangee entre" style="margin-bottom:14px"><span class="surtitre" style="color:var(--gris)">Tournées d’aujourd’hui · mercredi</span><b style="font-size:13px" id="faites"></b></div><div class="tournees" id="tournees"></div></section>
+  </main>
+</div>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/asso.js"></script>
+</body>
+</html>

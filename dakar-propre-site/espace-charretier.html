@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Espace charretier · Dakar Propre &amp; Inclusif</title>
+<meta name="description" content="L’espace des charretiers labellisés : tournée faite, kilos vendus, problème.">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-gabarit="app" data-page="espace-charretier">
+<main class="app app--foret sombre" id="app">
+  <!-- Connexion -->
+  <section class="app__colonne" id="vue-connexion" style="justify-content:center; gap:22px">
+    <div class="pile" style="--pile:16px; text-align:center; justify-items:center; display:grid">
+      <span style="width:104px"><i data-symbole="blanc"></i></span>
+      <span class="surtitre">Espace charretier</span>
+      <h1 style="font-size:3.5rem">Mon espace</h1>
+    </div>
+    <form id="connexion" class="pile" style="--pile:22px">
+      <div class="pile" style="--pile:10px"><span class="surtitre" style="color:var(--vert-300); font-size:11px">Mon numéro de label</span>
+        <div class="code"><input inputmode="numeric" maxlength="1" value="0" aria-label="Chiffre 1"><input inputmode="numeric" maxlength="1" value="0" aria-label="Chiffre 2"><input inputmode="numeric" maxlength="1" value="4" aria-label="Chiffre 3"><input inputmode="numeric" maxlength="1" value="2" aria-label="Chiffre 4"></div></div>
+      <button class="bouton bouton--primaire bouton--large" type="submit">Entrer</button>
+    </form>
+    <button class="rangee" type="button" data-son style="justify-content:center; background:none; border:0; color:var(--vert-300); font-weight:700; font-size:14px; cursor:pointer"><i data-ic="son"></i> Écouter en wolof</button>
+    <a href="index.html" style="text-align:center; font-size:13px; opacity:.6">Retour au site</a>
+  </section>
+
+  <!-- Accueil -->
+  <section class="app__colonne cache" id="vue-accueil">
+    <div class="rangee entre"><div><span class="surtitre" id="jour" style="font-size:11px">Mercredi</span><h1 id="bonjour" style="font-size:2.1rem">Bonjour Moussa</h1></div><button class="rond" type="button" data-son aria-label="Écouter en wolof" style="width:52px;height:52px"><i data-ic="son"></i></button></div>
+    <div class="bloc bloc--foret sombre"><div class="rangee entre"><span class="surtitre" style="font-size:10px" id="ma-zone">Zone Guédiawaye · N° 0042</span><span class="surtitre" style="font-size:10px; color:var(--vert-300)">40 ménages</span></div><i data-semaine></i></div>
+    <button class="gros-bouton gros-bouton--vert" type="button" data-action="tournee"><span class="pastille"><i data-ic="check"></i></span><span><b>Tournée faite</b><small>J’ai fini ma tournée</small></span><i data-ic="flecheD"></i></button>
+    <button class="gros-bouton gros-bouton--soleil" type="button" data-vers="vue-kilos"><span class="pastille"><i data-ic="recyclage"></i></span><span><b>Kilos vendus</b><small>Ce que j’ai vendu aujourd’hui</small></span><i data-ic="flecheD"></i></button>
+    <button class="gros-bouton gros-bouton--probleme" type="button" data-vers="vue-probleme"><span class="pastille"><i data-ic="alerte"></i></span><span><b>Problème</b><small>Rue bloquée, kit abîmé…</small></span><i data-ic="flecheD"></i></button>
+  </section>
+
+  <!-- Kilos vendus -->
+  <section class="app__colonne cache" id="vue-kilos">
+    <div class="app__retour"><button class="rond" type="button" data-vers="vue-accueil" aria-label="Retour"><i data-ic="flecheG"></i></button><span>Retour</span></div>
+    <h1>Kilos vendus aujourd’hui</h1>
+    <div class="bloc" style="padding-block:32px 28px; gap:18px; justify-items:center">
+      <div class="compteur" style="width:100%"><button type="button" id="moins" aria-label="Un kilo de moins"><i data-ic="moins"></i></button><output id="kilos" aria-live="polite">15<small> kg</small></output><button type="button" id="plus" aria-label="Un kilo de plus"><i data-ic="plus"></i></button></div>
+      <div class="choix" id="tri"><label><input type="radio" name="tri" value="75" checked><span>Triés</span></label><label><input type="radio" name="tri" value="50"><span>Mélangés</span></label></div>
+    </div>
+    <div class="bloc bloc--foret bloc--ligne entre sombre" style="display:flex"><div><span class="surtitre" style="font-size:11px; color:var(--vert-300)" id="calcul">15 kg × 75 FCFA</span><p style="font-size:11px; opacity:.7">Prix au kilo : hypothèse du dossier</p></div><b id="total" style="font:700 1.9rem/1 var(--titre); color:var(--soleil); white-space:nowrap">1 125 FCFA</b></div>
+    <button class="bouton bouton--primaire bouton--large pousse" type="button" data-action="kilos">Valider</button>
+  </section>
+
+  <!-- Problème -->
+  <section class="app__colonne cache" id="vue-probleme">
+    <div class="app__retour"><button class="rond" type="button" data-vers="vue-accueil" aria-label="Retour"><i data-ic="flecheG"></i></button><span>Retour</span></div>
+    <h1>Quel problème ?</h1>
+    <div class="tuiles" id="problemes">
+      <button class="tuile" type="button" aria-pressed="true" data-motif="Rue bloquée"><span class="pastille"><i data-ic="bloque"></i></span>Rue bloquée</button>
+      <button class="tuile" type="button" aria-pressed="false" data-motif="Kit abîmé"><span class="pastille"><i data-ic="outil"></i></span>Kit abîmé</button>
+      <button class="tuile" type="button" aria-pressed="false" data-motif="Cheval fatigué"><span class="pastille"><i data-ic="coeur"></i></span>Cheval fatigué</button>
+      <button class="tuile" type="button" aria-pressed="false" data-motif="Autre"><span class="pastille"><i data-ic="points"></i></span>Autre</button>
+    </div>
+    <button class="bloc bloc--ligne" type="button" data-son style="border:0; cursor:pointer; text-align:left"><span class="pastille" style="width:44px;height:44px"><i data-ic="son"></i></span><b style="font-size:14px">Expliquer avec un message vocal</b></button>
+    <button class="bouton bouton--primaire bouton--large" type="button" data-action="probleme">Envoyer</button>
+  </section>
+
+  <!-- Confirmation -->
+  <section class="app__colonne confirmation cache" id="vue-ok">
+    <span class="grand-rond"><i data-ic="check"></i></span>
+    <h1 style="font-size:3.5rem">C’est noté.</h1>
+    <p id="merci" style="font-size:19px; opacity:.85">Merci Moussa. À vendredi.</p>
+    <button class="bouton bouton--clair bouton--large" type="button" data-vers="vue-accueil">Retour</button>
+  </section>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/charretier.js"></script>
+</body>
+</html>

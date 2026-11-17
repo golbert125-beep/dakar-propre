@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La solution · Dakar Propre &amp; Inclusif</title>
+<meta name="description" content="Un kit d’adaptation pour la charrette, un sac de couleur pour les ménages et un réseau volontaire de charretiers.">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/vue-eclatee.css">
+</head>
+<body data-gabarit="site" data-page="solution">
+<main>
+  <section class="section hero hero--large" style="padding-bottom:40px">
+    <div class="pile" style="--pile:20px">
+      <p class="surtitre">La solution</p>
+      <h1>Deux innovations, chacune liée à une cause du problème.</h1>
+      <p class="chapo">La charrette est ouverte : les déchets tombent. Le charretier travaille seul : pas de circuit, pas de débouché. Nous agissons sur les deux.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:40px">
+    <div class="pile" style="--pile:32px">
+      <p class="surtitre">Innovation matérielle</p>
+      <div class="grille" style="--col:340px">
+        <article class="carte pile" style="--pile:22px"><p class="surtitre">Phase 1</p><h2 style="font-size:clamp(2rem,3.4vw,3rem)">Kit de base</h2><ul class="puces"><li>Une bâche de couverture</li><li>Des cordes ou sangles</li><li>Des crochets fixés sur la caisse</li></ul><div class="prix"><b>12 000 à 20 000 FCFA</b><p>par charrette (estimation). Payé surtout par un sponsor local, plus 2 000 à 5 000 FCFA du charretier.</p></div></article>
+        <article class="carte carte--foret pile sombre" style="--pile:22px"><p class="surtitre">Phase 2</p><h2 style="font-size:clamp(2rem,3.4vw,3rem)">Kit complet</h2><ul class="puces"><li>Des ridelles plus hautes</li><li>Une séparation des recyclables</li><li>Un panier arrière pour les déchets légers</li></ul><div class="prix"><b>40 000 à 75 000 FCFA</b><p>par charrette (estimation). Financé par une subvention de la commune.</p></div></article>
+      </div>
+      <article class="carte carte--soleil rangee" style="gap:clamp(24px,4vw,56px)">
+        <div class="cadre-photo" style="width:230px; --ratio:1" data-bloc-photo><img class="photo" src="assets/img/sac-tri.jpg" alt="Sac jaune rempli de bouteilles et de canettes" data-secours="retirer"></div>
+        <div class="pile" style="--pile:12px; flex:1; min-width:240px"><p class="surtitre">Pour le ménage</p><h2 style="font-size:clamp(1.8rem,3vw,2.75rem)">Le sac de couleur</h2><p style="font-size:18px">Bouteilles, plastiques et canettes dans le sac ; le reste dans la poubelle habituelle. Le charretier le reconnaît sans l’ouvrir. Gratuit pour le ménage, payé par le sponsor.</p></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section section--blanc" id="vue-eclatee">
+    <div class="pile" style="--pile:40px">
+      <div class="pile" style="--pile:16px"><p class="surtitre">Vue éclatée</p><h2>Neuf pièces, trois versions.</h2><p class="chapo">Faites tourner la charrette, écartez les pièces, roulez la bâche. Chaque pièce dit quel problème elle règle.</p></div>
+      <div class="ve">
+<div class="layout">
+    <section class="viewer" aria-label="Vue 3D">
+      <div class="kits">
+        <div class="seg" role="group" aria-label="Version affichée">
+          <button type="button" id="mode-actuelle" data-mode="actuelle" aria-pressed="false">Charrette actuelle</button>
+          <button type="button" id="mode-base" data-mode="base" aria-pressed="false">Kit de base</button>
+          <button type="button" id="mode-complet" data-mode="complet" aria-pressed="true">Kit complet</button>
+        </div>
+        <p class="modenote" id="modeNote"></p>
+      </div>
+      <div class="stage" id="stage">
+        <div id="gl"></div>
+        <div class="markers" id="markers"><span class="horse" id="horse">← Côté cheval</span></div>
+        <div class="scale">Caisse d'environ 2,0 m × 1,2 m · bâche d'environ 3 m × 4 m (indicatif)</div>
+        <div class="fallback" id="fallback" hidden>La vue 3D ne peut pas s'afficher sur cet appareil. La légende à côté décrit toutes les pièces.</div>
+      </div>
+      <div class="controls">
+        <div class="slider">
+          <label for="explode">Éclatement</label>
+          <input type="range" id="explode" min="0" max="100" value="75">
+          <output id="explodeOut" for="explode">75 %</output>
+        </div>
+        <div class="btns">
+          <button type="button" class="btn" id="lid" aria-pressed="false">Rouler la bâche</button>
+          <button type="button" class="btn" id="reset">Remettre la vue</button>
+        </div>
+      </div>
+      <p class="hint">Glissez pour tourner. Molette ou pincement pour zoomer. Touchez un numéro pour isoler la pièce.</p>
+    </section>
+
+    <section class="panel" aria-label="Légende">
+      <h3>Les 9 pièces</h3>
+      <p class="key"><span><span class="tag ex">Existant</span> déjà sur la charrette</span><span><span class="tag base">Kit de base</span> bâche, cordes et crochets</span><span><span class="tag full">Kit complet</span> s'ajoute au kit de base</span></p>
+      <ol class="legend" id="legend"></ol>
+      <p class="note">Dimensions et formes indicatives, à valider avec un charretier avant toute fabrication.</p>
+    </section>
+  </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="pile" style="--pile:48px">
+      <div class="pile" style="--pile:16px"><p class="surtitre">Innovation organisationnelle</p><h2>Un réseau volontaire, sans taxe.</h2></div>
+      <div class="grille" style="--col:230px">
+      <article class="carte pile " style="--pile:16px"><span class="pastille"><i data-ic="zone"></i></span><h3>Zone attribuée</h3><p>Découpée par rues avec les délégués de quartier.</p></article>
+      <article class="carte pile " style="--pile:16px"><span class="pastille"><i data-ic="passages"></i></span><h3>3 passages par semaine</h3><p>À jours fixes, que les ménages connaissent.</p></article>
+      <article class="carte pile " style="--pile:16px"><span class="pastille"><i data-ic="env"></i></span><h3>Formation</h3><p>Courte, avec contrôle du harnais du cheval.</p></article>
+      <article class="carte pile " style="--pile:16px"><span class="pastille"><i data-ic="label"></i></span><h3>Label</h3><p>Remis après la formation, reconnu par les riverains et la commune.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--blanc">
+    <div class="pile" style="--pile:48px">
+      <div class="pile" style="--pile:16px"><p class="surtitre">Le parcours</p><h2>Étape par étape.</h2></div>
+      <ol class="etapes">
+        <li><h3>Constat</h3><p>Les ordures s’accumulent, les charrettes les dispersent.</p></li>
+        <li><h3>Mise en place</h3><p>Le ménage reçoit son sac, le charretier son kit et son label.</p></li>
+        <li><h3>Tri et collecte</h3><p>Le sac de couleur d’un côté, la bâche fermée.</p></li>
+        <li><h3>Valorisation</h3><p>Les recyclables triés sont vendus à meilleur prix.</p></li>
+        <li><h3>Résultat</h3><p>Une rue propre, une activité reconnue.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section section--foret section--serree">
+    <div class="appel"><h2>Envie de soutenir le projet pilote ?</h2><div class="rangee"><a class="bouton bouton--primaire" href="sponsors.html">Devenir sponsor</a><a class="bouton bouton--clair" href="contact.html">Nous contacter</a></div></div>
+  </section>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/vendor/three.min.js"></script>
+<script src="assets/js/vue-eclatee.js"></script>
+</body>
+</html>

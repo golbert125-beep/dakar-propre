@@ -1,0 +1,538 @@
+/* Vue éclatée 3D de l’Éco-Charrette (three.js r128). Nécessite le bloc .ve de solution.html. */
+(function () {
+  "use strict";
+
+  var PARTS = [
+    { id: 1, name: "Châssis et essieu", tag: "ex", desc: "Ceux de la charrette actuelle, inchangés." },
+    { id: 2, name: "Roues", tag: "ex", desc: "Inchangées : on garde les roues et la largeur de la charrette actuelle. Le gabarit ne change pas." },
+    { id: 3, name: "Caisse", tag: "ex", desc: "La caisse en tôle que le charretier possède déjà. Le kit s'ajoute dessus, et les crochets y sont fixés." },
+    { id: 4, name: "Séparation des recyclables", tag: "full", desc: "Une tôle fine posée en travers de la caisse : recyclables à l'arrière (jaune), le reste à l'avant (vert). Le charretier garde séparé ce que le ménage a déjà trié." },
+    { id: 5, name: "Ridelles rehaussées", tag: "full", desc: "Rehausses en fer plat et tôle fine, légères pour ne pas fatiguer le cheval : la charge ne déborde plus." },
+    { id: 6, name: "Bâche de couverture", tag: "base", desc: "Bâche renforcée en polyéthylène, environ 3 m × 4 m, marquée du logo sur le dessus et sur les deux côtés, avec un emplacement pour le sponsor. Elle couvre toute la caisse et retombe sur les côtés : rien ne s'envole ni ne tombe. Elle se roule vers l'arrière pour charger." },
+    { id: 7, name: "Cordes et crochets", tag: "base", desc: "4 cordes ou sangles passent par-dessus la bâche et s'attachent à 8 crochets métalliques fixés sur la caisse : la bâche reste tendue pendant le trajet." },
+    { id: 8, name: "Brancards et harnais", tag: "ex", desc: "Ceux de la charrette actuelle. Le harnais est contrôlé lors de la formation." },
+    { id: 9, name: "Panier arrière", tag: "full", desc: "Pour les déchets légers (sacs, cartons) qui s'envolent facilement." }
+  ];
+  var TAG_LABEL = { ex: "Existant", base: "Kit de base", full: "Kit complet" };
+  var MODES = {
+    actuelle: { tags: ["ex"], note: "La charrette telle qu'elle roule aujourd'hui : une caisse ouverte, rien ne retient la charge." },
+    base: { tags: ["ex", "base"], note: "Kit de base : une bâche, 4 cordes ou sangles et 8 crochets fixés sur la caisse. Il règle directement les déchets qui tombent. Environ 12 000 à 20 000 FCFA, pose comprise (estimation)." },
+    complet: { tags: ["ex", "base", "full"], note: "Kit complet : on ajoute des ridelles plus hautes, une séparation pour les recyclables et un panier arrière. Environ 40 000 à 75 000 FCFA avec le kit de base (estimation)." }
+  };
+  var mode = "complet";
+  function shown(id) {
+    var t = PARTS[id - 1].tag;
+    return MODES[mode].tags.indexOf(t) !== -1;
+  }
+
+  var hover = null, selected = null, api = null;
+  var legendEl = document.getElementById("legend");
+  var itemEls = {};
+
+  function focusId() { return hover !== null ? hover : selected; }
+
+  function syncUI() {
+    var f = focusId();
+    PARTS.forEach(function (p) {
+      itemEls[p.id].classList.toggle("on", f === p.id);
+    });
+    if (api) api.refresh();
+  }
+  function setHover(id) { hover = id !== null && !shown(id) ? null : id; syncUI(); }
+  function toggle(id) { if (!shown(id)) return; selected = selected === id ? null : id; syncUI(); }
+
+  PARTS.forEach(function (p) {
+    var li = document.createElement("li");
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "item";
+    b.innerHTML =
+      '<span class="num">' + p.id + '</span>' +
+      '<span class="txt"><span class="name">' + p.name +
+      '<span class="tag ' + p.tag + '">' + TAG_LABEL[p.tag] + '</span></span>' +
+      '<span class="desc">' + p.desc + '</span></span>';
+    b.addEventListener("mouseenter", function () { setHover(p.id); });
+    b.addEventListener("mouseleave", function () { setHover(null); });
+    b.addEventListener("focus", function () { setHover(p.id); });
+    b.addEventListener("blur", function () { setHover(null); });
+    b.addEventListener("click", function () { toggle(p.id); });
+    li.appendChild(b);
+    legendEl.appendChild(li);
+    itemEls[p.id] = b;
+  });
+
+  var stage = document.getElementById("stage");
+  var glHost = document.getElementById("gl");
+  var markersEl = document.getElementById("markers");
+  var horseEl = document.getElementById("horse");
+  var explodeIn = document.getElementById("explode");
+  var explodeOut = document.getElementById("explodeOut");
+  var lidBtn = document.getElementById("lid");
+  var resetBtn = document.getElementById("reset");
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function build3D() {
+    if (!window.THREE) return null;
+    var renderer;
+    try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); } catch (e) { return null; }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    var cv = renderer.domElement;
+    cv.setAttribute("role", "img");
+    cv.setAttribute("aria-label", "Vue 3D éclatée de l'Éco-Charrette");
+    glHost.style.cssText = "position:absolute;inset:0";
+    glHost.appendChild(cv);
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x8a98a0, 0.9));
+    var sun = new THREE.DirectionalLight(0xffffff, 0.85); sun.position.set(4, 8, 5); scene.add(sun);
+    var fill = new THREE.DirectionalLight(0xffffff, 0.3); fill.position.set(-5, 3, -4); scene.add(fill);
+
+    var WOOD = 0xb07f4f, WOOD_D = 0x8a5f38, STEEL = 0x5f6f68, TIRE = 0x0a1f17;
+    var YEL = 0xffc42e, GRN = 0x149e63, TARP = 0x0b3d2e, STRAP = 0xf4ede1, HOOK = 0xffc42e, BASK = 0x8b979e;
+
+    var P = {};
+    function part(id) {
+      var p = { id: id, items: [], mats: [], anchor: null, pivot: null };
+      p.lm = new THREE.LineBasicMaterial({ color: 0x0a1f17, transparent: true, opacity: 0.4 });
+      p.lm.userData = { base: 0.4, line: true };
+      p.mats.push(p.lm);
+      P[id] = p;
+      return p;
+    }
+    function mat(p, color, opacity) {
+      var o = opacity == null ? 1 : opacity;
+      var m = new THREE.MeshStandardMaterial({ color: color, roughness: 0.78, metalness: 0.06 });
+      m.emissive.copy(m.color);
+      m.emissiveIntensity = 0;
+      m.opacity = o; m.transparent = o < 1; m.depthWrite = o >= 1;
+      m.userData = { base: o };
+      p.mats.push(m);
+      return m;
+    }
+    function item(p, base, off) {
+      var g = new THREE.Group();
+      scene.add(g);
+      p.items.push({ g: g, base: new THREE.Vector3(base[0], base[1], base[2]), off: new THREE.Vector3(off[0], off[1], off[2]) });
+      return g;
+    }
+    function box(p, g, w, h, d, x, y, z, m) {
+      var mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
+      mesh.position.set(x, y, z);
+      g.add(mesh);
+      mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), p.lm));
+      return mesh;
+    }
+
+    /* 1. Châssis et essieu */
+    var p1 = part(1), m1 = mat(p1, STEEL), g1 = item(p1, [0, 0, 0], [0, -0.45, 0]);
+    box(p1, g1, 2.4, 0.1, 0.08, 0.2, 0.85, 0.5, m1);
+    box(p1, g1, 2.4, 0.1, 0.08, 0.2, 0.85, -0.5, m1);
+    [-0.7, -0.1, 0.5, 1.1].forEach(function (x) { box(p1, g1, 0.08, 0.08, 1.2, x, 0.85, 0, m1); });
+    [0.5, -0.5].forEach(function (z) { box(p1, g1, 0.08, 0.33, 0.08, 0.2, 0.635, z, m1); });
+    var axle = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.7, 14), m1);
+    axle.rotation.x = Math.PI / 2; axle.position.set(0.2, 0.47, 0); g1.add(axle);
+    p1.anchor = { obj: g1, v: new THREE.Vector3(1.0, 0.9, 0.5) };
+
+    /* 2. Roues (deux groupes) */
+    var p2 = part(2), mt = mat(p2, TIRE), mw = mat(p2, WOOD), mh = mat(p2, STEEL);
+    function wheel(z) {
+      var g = item(p2, [0.2, 0.47, z], [0, -0.55, z > 0 ? 1.0 : -1.0]);
+      var tire = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.05, 10, 36), mt);
+      g.add(tire);
+      for (var i = 0; i < 4; i++) {
+        var sp = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.84, 0.03), mw);
+        sp.rotation.z = i * Math.PI / 4; g.add(sp);
+      }
+      var hub = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.12, 14), mh);
+      hub.rotation.x = Math.PI / 2; g.add(hub);
+      return g;
+    }
+    var wR = wheel(0.75); wheel(-0.75);
+    p2.anchor = { obj: wR, v: new THREE.Vector3(0, 0, 0.09) };
+
+    /* 3. Caisse existante en tôle */
+    var p3 = part(3), m3 = mat(p3, 0x7c8a82), g3 = item(p3, [0, 0, 0], [0, 0, 0]);
+    m3.metalness = 0.15;
+    box(p3, g3, 2.0, 0.03, 1.2, 0.2, 0.915, 0, m3);
+    box(p3, g3, 0.03, 0.5, 1.2, -0.785, 1.15, 0, m3);
+    box(p3, g3, 0.03, 0.5, 1.2, 1.185, 1.15, 0, m3);
+    box(p3, g3, 2.0, 0.5, 0.03, 0.2, 1.15, 0.585, m3);
+    box(p3, g3, 2.0, 0.5, 0.03, 0.2, 1.15, -0.585, m3);
+    p3.anchor = { obj: g3, v: new THREE.Vector3(-0.35, 1.2, 0.6) };
+
+    /* 4. Séparation : une tôle en travers, zone recyclables à l'arrière, reste à l'avant */
+    var p4 = part(4), m4 = mat(p4, 0xa9b4b0), m4y = mat(p4, YEL), m4g = mat(p4, GRN);
+    var g4 = item(p4, [0, 0, 0], [0, 0.75, 0]);
+    box(p4, g4, 0.025, 0.47, 1.14, 0.55, 1.165, 0, m4);
+    box(p4, g4, 0.6, 0.012, 1.12, 0.865, 0.937, 0, m4y);
+    box(p4, g4, 1.3, 0.012, 1.12, -0.12, 0.937, 0, m4g);
+    p4.anchor = { obj: g4, v: new THREE.Vector3(0.55, 1.4, 0.4) };
+
+    /* 5. Ridelles rehaussées en fer plat et tôle fine */
+    var p5 = part(5), m5 = mat(p5, 0x8c9894), g5 = item(p5, [0, 0, 0], [0, 0.95, 0]);
+    m5.metalness = 0.25;
+    box(p5, g5, 2.04, 0.3, 0.02, 0.2, 1.55, 0.6, m5);
+    box(p5, g5, 2.04, 0.3, 0.02, 0.2, 1.55, -0.6, m5);
+    box(p5, g5, 0.02, 0.3, 1.2, -0.8, 1.55, 0, m5);
+    box(p5, g5, 0.02, 0.3, 1.2, 1.2, 1.55, 0, m5);
+    [-0.8, -0.13, 0.53, 1.2].forEach(function (x) {
+      box(p5, g5, 0.04, 0.32, 0.04, x, 1.55, 0.6, m5);
+      box(p5, g5, 0.04, 0.32, 0.04, x, 1.55, -0.6, m5);
+    });
+    p5.anchor = { obj: g5, v: new THREE.Vector3(0.2, 1.7, 0.62) };
+
+    /* 6. Bâche souple qui couvre toute la caisse et retombe sur les côtés.
+       Elle se roule vers l'arrière (RX) pour charger. */
+    var CX = 0.2, HL = 1.04, HW = 0.64, TOP = 1.70, OV = 0.13, RX = CX + HL + OV;
+    function tarpY(x, z) {
+      var dx = Math.max(0, Math.abs(x - CX) - HL), dz = Math.max(0, Math.abs(z) - HW);
+      var d = Math.max(dx, dz);
+      if (d > 0) return TOP - 3.0 * d + 0.014 * Math.sin(x * 11 + z * 7);
+      var u = (x - CX) / HL, w = z / HW;
+      return TOP + 0.17 * (1 - w * w) * (1 - 0.6 * Math.pow(u, 4)) + 0.008 * Math.sin(x * 9) * (1 - w * w);
+    }
+    var p6 = part(6), m6 = mat(p6, TARP, 0.94), g6 = item(p6, [0, 0, 0], [0, 1.6, 0]);
+    m6.side = THREE.DoubleSide; m6.roughness = 0.9;
+    var rg6 = new THREE.Group(); rg6.position.set(RX, 0, 0); g6.add(rg6); p6.roll = rg6;
+    /* Logo Dakar Propre & Inclusif imprimé sur le dessus de la bâche */
+    var logoCv = document.createElement("canvas"); logoCv.width = 2340; logoCv.height = 1540;
+    var logoTex = new THREE.CanvasTexture(logoCv); logoTex.flipY = false;
+    if (renderer.capabilities.getMaxAnisotropy) logoTex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    var LEAVES = ["M120.00 105.00 C78.00 84.00, 86.00 46.00, 130.00 34.00 C158.00 56.00, 154.00 90.00, 120.00 105.00 Z", "M132.99 127.50 C172.18 101.63, 201.09 127.56, 189.48 171.66 C156.43 184.91, 128.98 164.44, 132.99 127.50 Z", "M107.01 127.50 C109.82 174.37, 72.91 186.44, 40.52 154.34 C45.57 119.09, 77.02 105.56, 107.01 127.50 Z"];
+    /* Dessine le logo centré en (cx, cy) ; sy écrase la hauteur (pans latéraux), rot le retourne */
+    function logoAt(c, cx, cy, k, sy, rot, sig) {
+      c.save(); c.translate(cx, cy); c.rotate(rot); c.scale(k, k * sy);
+      c.font = '800 96px "Bricolage Grotesque", system-ui, sans-serif';
+      var tw = Math.max(c.measureText("Dakar Propre").width, c.measureText("& Inclusif").width);
+      var w = 274 + tw, h = 250;
+      c.translate(-w / 2, -h / 2);
+      c.lineWidth = 17; c.strokeStyle = "#ffffff"; c.beginPath(); c.arc(120, 125, 100, 0, Math.PI * 2); c.stroke();
+      c.save(); c.translate(0, 5);
+      c.fillStyle = "#ffc42e"; c.fill(new Path2D(LEAVES[0]));
+      c.fillStyle = "#ffffff"; c.fill(new Path2D(LEAVES[1])); c.fill(new Path2D(LEAVES[2]));
+      c.beginPath(); c.arc(120, 120, 8, 0, Math.PI * 2); c.fill();
+      c.restore();
+      c.textBaseline = "alphabetic";
+      c.fillStyle = "#ffffff"; c.fillText("Dakar Propre", 274, sig ? 108 : 118);
+      c.fillStyle = "#ffc42e"; c.fillText("& Inclusif", 274, sig ? 200 : 212);
+      if (sig) { c.font = '700 24px "DM Sans", system-ui, sans-serif'; c.fillStyle = "#d5eedf"; c.fillText("É C O - I N N O V   D A K A R", 278, 246); }
+      c.restore();
+    }
+    /* Emplacement réservé au logo du sponsor, en pointillés */
+    function sponsorAt(c, cx, cy, sy, rot) {
+      c.save(); c.translate(cx, cy); c.rotate(rot); c.scale(1, sy);
+      var w = 520, h = 250, r = 28;
+      c.setLineDash([26, 18]); c.lineWidth = 7; c.strokeStyle = "rgba(255,255,255,0.8)";
+      c.beginPath();
+      c.moveTo(-w / 2 + r, -h / 2); c.lineTo(w / 2 - r, -h / 2); c.arcTo(w / 2, -h / 2, w / 2, -h / 2 + r, r);
+      c.lineTo(w / 2, h / 2 - r); c.arcTo(w / 2, h / 2, w / 2 - r, h / 2, r);
+      c.lineTo(-w / 2 + r, h / 2); c.arcTo(-w / 2, h / 2, -w / 2, h / 2 - r, r);
+      c.lineTo(-w / 2, -h / 2 + r); c.arcTo(-w / 2, -h / 2, -w / 2 + r, -h / 2, r);
+      c.closePath(); c.stroke(); c.setLineDash([]);
+      c.font = '700 52px "DM Sans", system-ui, sans-serif'; c.textAlign = "center"; c.textBaseline = "middle";
+      c.fillStyle = "rgba(255,255,255,0.9)";
+      c.fillText("LOGO", 0, -34); c.fillText("SPONSOR", 0, 34);
+      c.restore();
+    }
+    function drawLogo() {
+      var c = logoCv.getContext("2d"), W = logoCv.width, H = logoCv.height;
+      c.fillStyle = "#0b3d2e"; c.fillRect(0, 0, W, H);
+      /* dessus de la bâche */
+      logoAt(c, W / 2, H / 2, 1.75, 1, 0, true);
+      /* pans latéraux : bande de 8,4 % de la hauteur, étirée environ 3,2 fois une fois posée en pente */
+      var strip = H * 0.13 / 1.54, sq = 0.316, k = 1.25;
+      /* logo décalé vers la gauche du pan, emplacement du sponsor à droite */
+      logoAt(c, W * 0.36, H - strip * 0.52, k, sq, 0, false);
+      sponsorAt(c, W * 0.76, H - strip * 0.52, sq, 0);
+      logoAt(c, W * 0.64, strip * 0.52, k, sq, Math.PI, false);
+      sponsorAt(c, W * 0.24, strip * 0.52, sq, Math.PI);
+      logoTex.needsUpdate = true;
+    }
+    drawLogo();
+    m6.map = logoTex; m6.color.set(0xffffff); m6.needsUpdate = true;
+    if (document.fonts && document.fonts.load) {
+      Promise.all([document.fonts.load('800 96px "Bricolage Grotesque"'), document.fonts.load('700 24px "DM Sans"')])
+        .then(function () { drawLogo(); dirty = true; }).catch(function () {});
+    }
+    var SX = 90, SZ = 46, x0 = CX - HL - OV, x1 = RX, z0 = -HW - OV, z1 = HW + OV;
+    var tg = new THREE.PlaneGeometry(1, 1, SX, SZ), pos = tg.attributes.position;
+    for (var ti = 0; ti < pos.count; ti++) {
+      var tx = x0 + (pos.getX(ti) + 0.5) * (x1 - x0), tz = z0 + (pos.getY(ti) + 0.5) * (z1 - z0);
+      pos.setXYZ(ti, tx - RX, tarpY(tx, tz), tz);
+    }
+    tg.computeVertexNormals();
+    rg6.add(new THREE.Mesh(tg, m6));
+    var rollMesh = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, z1 - z0, 18), m6);
+    rollMesh.rotation.x = Math.PI / 2; rollMesh.visible = false; g6.add(rollMesh);
+    p6.rollMesh = rollMesh;
+    p6.anchor = { obj: rg6, v: new THREE.Vector3(CX - RX, tarpY(CX, 0.32), 0.32) };
+
+    /* 7. Cordes (suivent la bâche) et crochets (fixés sur les côtés de la caisse) */
+    var p7 = part(7), ms = mat(p7, STRAP), mk = mat(p7, HOOK), g7 = item(p7, [0, 0, 0], [0, 1.85, 0]);
+    var rg7 = new THREE.Group(); rg7.position.set(RX, 0, 0); g7.add(rg7); p7.roll = rg7;
+    var hookY = TOP - 3.0 * OV - 0.03;
+    [-0.6, -0.05, 0.5, 1.05].forEach(function (x) {
+      var cpts = [new THREE.Vector3(x - RX, hookY, -HW - 0.035)];
+      for (var k = 0; k <= 24; k++) {
+        var z = z0 + (z1 - z0) * k / 24;
+        cpts.push(new THREE.Vector3(x - RX, tarpY(x, z) + 0.014, z));
+      }
+      cpts.push(new THREE.Vector3(x - RX, hookY, HW + 0.035));
+      var rope = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(cpts), 60, 0.012, 6, false), ms);
+      rg7.add(rope);
+      box(p7, g7, 0.06, 0.07, 0.04, x, hookY, HW + 0.03, mk);
+      box(p7, g7, 0.06, 0.07, 0.04, x, hookY, -HW - 0.03, mk);
+    });
+    p7.anchor = { obj: rg7, v: new THREE.Vector3(-0.6 - RX, tarpY(-0.6, 0.5) + 0.03, 0.5) };
+
+    /* 8. Brancards et harnais */
+    var p8 = part(8), m8 = mat(p8, WOOD_D), mc = mat(p8, STRAP), g8 = item(p8, [0, 0, 0], [-1.3, -0.1, 0]);
+    box(p8, g8, 1.66, 0.06, 0.06, -1.67, 0.98, 0.42, m8);
+    box(p8, g8, 1.66, 0.06, 0.06, -1.67, 0.98, -0.42, m8);
+    box(p8, g8, 0.06, 0.06, 0.9, -1.4, 0.98, 0, m8);
+    var collar = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.045, 10, 30), mc);
+    collar.rotation.y = Math.PI / 2; collar.position.set(-2.35, 1.15, 0);
+    g8.add(collar);
+    collar.add(new THREE.LineSegments(new THREE.EdgesGeometry(collar.geometry, 40), p8.lm));
+    p8.anchor = { obj: g8, v: new THREE.Vector3(-2.35, 1.48, 0) };
+    var horseAnchor = { obj: g8, v: new THREE.Vector3(-2.9, 0.85, 0) };
+
+    /* 9. Panier arrière */
+    var p9 = part(9), m9 = mat(p9, BASK), m9w = mat(p9, BASK, 0.28), g9 = item(p9, [0, 0, 0], [1.1, -0.1, 0]);
+    box(p9, g9, 0.5, 0.03, 0.9, 1.51, 0.86, 0, m9);
+    box(p9, g9, 0.5, 0.35, 0.9, 1.51, 1.045, 0, m9w);
+    p9.anchor = { obj: g9, v: new THREE.Vector3(1.51, 1.23, 0) };
+
+    /* Sol */
+    var gridMat = new THREE.LineBasicMaterial({ color: 0x9fb0ab, transparent: true, opacity: 0.5 });
+    var gp = [];
+    for (var i = -10; i <= 10; i++) {
+      var t = i * 0.5;
+      gp.push(new THREE.Vector3(-5, 0, t), new THREE.Vector3(5, 0, t), new THREE.Vector3(t, 0, -5), new THREE.Vector3(t, 0, 5));
+    }
+    var grid = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(gp), gridMat);
+    scene.add(grid);
+
+    function readTheme() {
+      var c = getComputedStyle(document.documentElement).getPropertyValue("--ground").trim();
+      if (c) gridMat.color.set(c);
+      dirty = true;
+    }
+
+    /* Marqueurs numérotés */
+    var markers = {};
+    PARTS.forEach(function (pt) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "marker"; b.textContent = pt.id;
+      b.setAttribute("aria-label", pt.id + " : " + pt.name);
+      b.addEventListener("mouseenter", function () { setHover(pt.id); });
+      b.addEventListener("mouseleave", function () { setHover(null); });
+      b.addEventListener("click", function () { toggle(pt.id); });
+      markersEl.appendChild(b);
+      markers[pt.id] = b;
+    });
+
+    /* État */
+    var ex = 0.75, exT = 0.75, lid = 0, lidT = 0, LID_OPEN = 1;
+    var az = 0.62, el = 0.36, zoom = 1, dirty = true;
+    var HOME = { az: az, el: el, zoom: zoom };
+
+    function pose() {
+      Object.keys(P).forEach(function (k) {
+        P[k].items.forEach(function (it) { it.g.position.copy(it.base).addScaledVector(it.off, ex); });
+      });
+      if (!shown(5)) {
+        P[6].items[0].g.position.y -= 0.3;
+        P[7].items[0].g.position.y -= 0.3;
+      }
+      var sx = 1 - 0.93 * lid;
+      P[6].roll.scale.x = sx;
+      P[7].roll.scale.x = sx;
+      var rm = P[6].rollMesh, rr = 0.02 + 0.08 * lid;
+      rm.visible = lid > 0.03;
+      rm.scale.set(rr, 1, rr);
+      rm.position.set(RX + (x0 - RX) * sx, TOP + rr, 0);
+      grid.position.y = -0.55 * ex - 0.004;
+    }
+    function placeCamera() {
+      var w = stage.clientWidth || 800, h = stage.clientHeight || 500, asp = w / h;
+      var t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+      var o = 0;
+      var H = (2.4 + 2.4 * ex) + ((3.4 + 2.3 * ex) - (2.4 + 2.4 * ex)) * o;
+      var cy = (0.9 + 0.62 * ex) + ((1.5 + 0.6 * ex) - (0.9 + 0.62 * ex)) * o;
+      var W = 4.8 + 2.4 * ex;
+      var r = Math.max(H / (2 * t), W / (2 * t * asp)) * 1.06 / zoom;
+      var tx = -0.4 - 0.1 * ex, ce = Math.cos(el);
+      camera.position.set(tx + r * ce * Math.sin(az), cy + r * Math.sin(el), r * ce * Math.cos(az));
+      camera.lookAt(tx, cy, 0);
+      camera.updateMatrixWorld();
+    }
+    function project(a) {
+      var v = a.obj.localToWorld(a.v.clone());
+      v.project(camera);
+      return { x: (v.x * 0.5 + 0.5) * stage.clientWidth, y: (-v.y * 0.5 + 0.5) * stage.clientHeight };
+    }
+    function updateMarkers() {
+      PARTS.forEach(function (pt) {
+        var s = project(P[pt.id].anchor);
+        markers[pt.id].style.transform = "translate(" + s.x + "px," + s.y + "px) translate(-50%,-50%)";
+      });
+      var hs = project(horseAnchor);
+      horseEl.style.transform = "translate(" + hs.x + "px," + hs.y + "px) translate(-50%,-50%)";
+    }
+    function resize() {
+      var w = stage.clientWidth, h = stage.clientHeight;
+      if (!w || !h) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h; camera.updateProjectionMatrix();
+      dirty = true;
+    }
+    function draw() {
+      pose(); placeCamera(); scene.updateMatrixWorld(true);
+      renderer.render(scene, camera);
+      updateMarkers();
+      dirty = false;
+    }
+    function frame() {
+      requestAnimationFrame(frame);
+      var moving = false, k = reduce ? 1 : 0.15;
+      if (ex !== exT) { ex = Math.abs(exT - ex) < 0.0005 ? exT : ex + (exT - ex) * k; moving = true; }
+      if (lid !== lidT) { lid = Math.abs(lidT - lid) < 0.002 ? lidT : lid + (lidT - lid) * k; moving = true; }
+      if (moving || dirty) draw();
+    }
+
+    function refresh() {
+      var f = focusId();
+      Object.keys(P).forEach(function (k) {
+        var p = P[k], on = f === p.id, dim = f !== null && !on;
+        p.mats.forEach(function (m) {
+          var b = m.userData.base;
+          if (m.userData.line) {
+            m.opacity = dim ? 0.05 : b;
+          } else {
+            m.opacity = dim ? Math.min(b, 0.14) : b;
+            m.transparent = dim || b < 1;
+            m.depthWrite = !m.transparent;
+            m.emissiveIntensity = on ? 0.3 : 0;
+          }
+          m.needsUpdate = true;
+        });
+        markers[p.id].classList.toggle("on", on);
+        markers[p.id].classList.toggle("dim", dim);
+      });
+      dirty = true;
+    }
+
+    /* Contrôles */
+    explodeIn.addEventListener("input", function () {
+      exT = explodeIn.value / 100;
+      explodeOut.textContent = explodeIn.value + " %";
+    });
+    lidBtn.addEventListener("click", function () {
+      var open = lidT === 0;
+      lidT = open ? LID_OPEN : 0;
+      lidBtn.textContent = open ? "Dérouler la bâche" : "Rouler la bâche";
+      lidBtn.setAttribute("aria-pressed", open ? "true" : "false");
+    });
+    resetBtn.addEventListener("click", function () { az = HOME.az; el = HOME.el; zoom = HOME.zoom; dirty = true; });
+
+    /* Rotation et zoom */
+    var pts = new Map(), startX = 0, startY = 0, moved = 0;
+    function dist() {
+      var a = Array.from(pts.values());
+      return a.length < 2 ? 0 : Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y);
+    }
+    stage.addEventListener("pointerdown", function (e) {
+      if (e.target.closest("button")) return;
+      try { stage.setPointerCapture(e.pointerId); } catch (err) {}
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size === 1) { startX = e.clientX; startY = e.clientY; moved = 0; }
+    });
+    stage.addEventListener("pointermove", function (e) {
+      var prev = pts.get(e.pointerId);
+      if (!prev) return;
+      if (pts.size === 1) {
+        az -= (e.clientX - prev.x) * 0.008;
+        el = Math.min(1.35, Math.max(0.02, el + (e.clientY - prev.y) * 0.006));
+        moved = Math.max(moved, Math.hypot(e.clientX - startX, e.clientY - startY));
+        pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      } else {
+        var before = dist();
+        pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        var after = dist();
+        if (before > 0) zoom = Math.min(2.2, Math.max(0.55, zoom * after / before));
+        moved = 99;
+      }
+      dirty = true;
+    });
+    function endPointer(e) {
+      if (!pts.has(e.pointerId)) return;
+      var single = pts.size === 1;
+      pts.delete(e.pointerId);
+      if (single && moved < 4 && selected !== null) { selected = null; syncUI(); }
+    }
+    stage.addEventListener("pointerup", endPointer);
+    stage.addEventListener("pointercancel", endPointer);
+    stage.addEventListener("wheel", function (e) {
+      e.preventDefault();
+      zoom = Math.min(2.2, Math.max(0.55, zoom * Math.exp(-e.deltaY * 0.001)));
+      dirty = true;
+    }, { passive: false });
+
+    /* Thème */
+    readTheme();
+    if (window.matchMedia) {
+      var mq = window.matchMedia("(prefers-color-scheme: dark)");
+      if (mq.addEventListener) mq.addEventListener("change", readTheme);
+    }
+    new MutationObserver(readTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+    if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
+    else window.addEventListener("resize", resize);
+    resize();
+    draw();
+    requestAnimationFrame(frame);
+    function applyMode() {
+      Object.keys(P).forEach(function (k) {
+        var on = shown(P[k].id);
+        P[k].items.forEach(function (it) { it.g.visible = on; });
+        markers[P[k].id].hidden = !on;
+      });
+      dirty = true;
+    }
+    applyMode();
+    return { refresh: refresh, applyMode: applyMode };
+  }
+
+  var dirty = false;
+  try { api = build3D(); } catch (err) { api = null; if (window.console) console.error(err); }
+  if (!api) {
+    document.getElementById("fallback").hidden = false;
+    explodeIn.disabled = true; lidBtn.disabled = true; resetBtn.disabled = true;
+  }
+
+  var modeNote = document.getElementById("modeNote");
+  var modeBtns = Array.prototype.slice.call(document.querySelectorAll(".seg button"));
+  function setMode(m) {
+    mode = m;
+    modeBtns.forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-mode") === m ? "true" : "false"); });
+    modeNote.textContent = MODES[m].note;
+    PARTS.forEach(function (p) {
+      var on = shown(p.id);
+      itemEls[p.id].classList.toggle("off", !on);
+      itemEls[p.id].setAttribute("aria-disabled", on ? "false" : "true");
+    });
+    if (selected !== null && !shown(selected)) selected = null;
+    if (hover !== null && !shown(hover)) hover = null;
+    if (api) {
+      lidBtn.disabled = !shown(6);
+      api.applyMode();
+    }
+    syncUI();
+  }
+  modeBtns.forEach(function (b) {
+    b.addEventListener("click", function () { setMode(b.getAttribute("data-mode")); });
+  });
+  setMode(mode);
+})();

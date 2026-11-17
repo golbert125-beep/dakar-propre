@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le label Charrette propre · Dakar Propre &amp; Inclusif</title>
+<meta name="description" content="Un charretier labellisé est formé, équipé et identifié. Scannez le QR code pour savoir qui passe chez vous.">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-gabarit="site" data-page="label">
+<main>
+  <section class="section hero">
+    <div class="duo" style="--droite:360px">
+      <div class="pile"><p class="surtitre">Le label</p><h1 style="max-width:14ch; font-size:clamp(2.4rem,5.4vw,4.75rem)">Charrette propre : formé, équipé, identifié.</h1><p class="chapo">Le label est remis après la formation. Il n’est jamais imposé : il récompense un engagement volontaire.</p></div>
+      <div class="plaque" role="img" aria-label="Label Charrette propre, numéro 0042, zone Pikine">
+        <div class="plaque__haut"><span class="surtitre">Label</span><i data-symbole="blanc"></i><span class="plaque__nom">Charrette<br>propre</span><small>Formé · Équipé · Identifié</small></div>
+        <div class="plaque__numero">N° 0042 · Zone Pikine</div>
+      </div>
+    </div>
+  </section>
+  <section class="section" style="padding-top:0">
+    <div class="grille" style="--col:280px">
+      <article class="carte pile " style="--pile:16px"><span class="pastille"><i data-ic="env"></i></span><h3>Formé</h3><p>Une courte formation : chargement, bâche, tri, harnais du cheval.</p></article>
+      <article class="carte pile " style="--pile:16px"><span class="pastille"><i data-ic="charrette"></i></span><h3>Équipé</h3><p>Le kit de base posé sur sa charrette : bâche, cordes, crochets.</p></article>
+      <article class="carte pile " style="--pile:16px"><span class="pastille"><i data-ic="zone"></i></span><h3>Identifié</h3><p>Un numéro unique et une zone attribuée, visibles sur la bâche.</p></article>
+    </div>
+  </section>
+  <section class="section section--foret">
+    <div class="duo" style="--droite:280px">
+      <div class="pile"><p class="surtitre">Pour les ménages</p><h2>Scannez, vous savez qui passe.</h2><p class="chapo">Chaque label porte un QR code. Il ouvre la fiche du charretier : son nom, sa zone, ses jours de passage. Et un bouton pour signaler un passage manqué.</p><a class="bouton bouton--primaire" href="fiche.html?id=0042">Voir un exemple de fiche</a></div>
+      <a class="qr" href="fiche.html?id=0042" aria-label="Ouvrir la fiche du charretier numéro 0042"><div class="qr__code" id="qr"></div><span class="surtitre" style="color:var(--encre)">N° 0042 · Zone Guédiawaye</span></a>
+    </div>
+  </section>
+  <section class="section">
+    <div class="pile" style="--pile:48px">
+      <div class="pile" style="--pile:16px"><p class="surtitre">Où le trouver</p><h2>Sur la bâche, sur le gilet, sur la carte.</h2></div>
+      <div class="grille" style="--col:280px">
+      <article class="carte pile " style="--pile:16px"><span class="pastille"><i data-ic="charrette"></i></span><h3>Sur la bâche</h3><p>La plaque du label, avec le numéro et la zone, côté rue.</p></article>
+      <article class="carte pile " style="--pile:16px"><span class="pastille"><i data-ic="label"></i></span><h3>Sur le gilet</h3><p>La pastille jaune dans le dos du charretier.</p></article>
+      <article class="carte pile " style="--pile:16px"><span class="pastille"><i data-ic="menage"></i></span><h3>Sur la carte</h3><p>La carte du charretier, avec ses jours de passage.</p></article>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  /* QR code réel : il pointe vers la fiche du charretier à l'adresse où le site est ouvert. */
+  (function () {
+    var cible = document.getElementById("qr");
+    if (window.QRCode) new QRCode(cible, { text: new URL("fiche.html?id=0042", location.href).href, width: 420, height: 420, colorDark: "#0A1F17", colorLight: "#FFFFFF" });
+    else cible.innerHTML = '<p class="note" style="padding:24px;text-align:center">QR code indisponible hors connexion.</p>';
+  })();
+</script>
+</body>
+</html>

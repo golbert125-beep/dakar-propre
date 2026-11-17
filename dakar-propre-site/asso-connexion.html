@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Espace association · Dakar Propre &amp; Inclusif</title>
+<meta name="description" content="Connexion à l’espace de l’association Éco-Innov Dakar.">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-gabarit="asso-connexion" data-page="asso-connexion">
+<main class="connexion">
+  <div class="connexion__panneau sombre">
+    <div class="verre verre--logo"><span data-logo="blanc"></span></div>
+    <div class="verre pile" style="--pile:16px"><p class="surtitre">Espace réseau</p><h1>Faire tourner le réseau, simplement.</h1><p>Zones, charretiers, signalements et indicateurs du pilote.</p></div>
+  </div>
+  <div class="connexion__form">
+    <div class="auth">
+      <!-- Vue 1 : se connecter -->
+      <form class="auth__vue" id="vue-connexion" novalidate>
+        <h1>Connexion</h1>
+        <label class="champ"><span>E-mail</span><input type="email" name="email" autocomplete="username" placeholder="association@exemple.sn" required></label>
+        <label class="champ"><span>Mot de passe</span><input type="password" name="mdp" autocomplete="current-password" placeholder="••••••••" required></label>
+        <button class="lien auth__lien auth__droite" type="button" data-vue="vue-oubli">Mot de passe oublié ?</button>
+        <button class="bouton bouton--sombre bouton--large" type="submit">Se connecter</button>
+        <p class="auth__ou"><span>ou</span></p>
+        <button class="bouton bouton--contour bouton--large auth__google" type="button" data-google><span class="auth__g" aria-hidden="true">G</span> Continuer avec Google</button>
+        <p class="auth__bascule">Pas encore de compte ? <button class="lien auth__lien" type="button" data-vue="vue-creation">Créer un compte</button></p>
+      </form>
+
+      <!-- Vue 2 : créer un compte -->
+      <form class="auth__vue cache" id="vue-creation" novalidate>
+        <h1>Créer un compte</h1>
+        <label class="champ"><span>Nom complet</span><input name="nom" autocomplete="name" placeholder="Votre nom" required></label>
+        <label class="champ"><span>E-mail</span><input type="email" name="email" autocomplete="email" placeholder="vous@exemple.sn" required></label>
+        <label class="champ"><span>Mot de passe</span><input type="password" name="mdp" autocomplete="new-password" placeholder="8 caractères minimum" minlength="8" required></label>
+        <label class="champ"><span>Confirmer le mot de passe</span><input type="password" name="mdp2" autocomplete="new-password" placeholder="Le même mot de passe" required></label>
+        <p class="auth__erreur cache" role="alert"></p>
+        <button class="bouton bouton--sombre bouton--large" type="submit">Créer mon compte</button>
+        <p class="auth__ou"><span>ou</span></p>
+        <button class="bouton bouton--contour bouton--large auth__google" type="button" data-google><span class="auth__g" aria-hidden="true">G</span> S’inscrire avec Google</button>
+        <p class="auth__bascule">Déjà un compte ? <button class="lien auth__lien" type="button" data-vue="vue-connexion">Se connecter</button></p>
+      </form>
+
+      <!-- Vue 3 : mot de passe oublié -->
+      <form class="auth__vue cache" id="vue-oubli" novalidate>
+        <button class="lien auth__lien" type="button" data-vue="vue-connexion">← Retour à la connexion</button>
+        <h1>Mot de passe oublié</h1>
+        <p class="note">Indiquez votre e-mail : vous recevrez un lien pour choisir un nouveau mot de passe.</p>
+        <label class="champ"><span>E-mail</span><input type="email" name="email" autocomplete="email" placeholder="association@exemple.sn" required></label>
+        <p class="auth__erreur cache" role="alert"></p>
+        <button class="bouton bouton--sombre bouton--large" type="submit">Envoyer le lien</button>
+      </form>
+
+      <!-- Vue 4 : confirmation (compte créé ou lien envoyé) -->
+      <div class="auth__vue auth__ok cache" id="vue-ok" role="status" tabindex="-1">
+        <span class="pastille" style="background:var(--soleil); color:var(--encre); width:80px; height:80px"><i data-ic="check"></i></span>
+        <h1 id="ok-titre">C’est fait.</h1>
+        <p class="note" id="ok-texte"></p>
+        <a class="bouton bouton--sombre bouton--large cache" id="ok-entrer" href="asso-tableau.html">Ouvrir le tableau de bord</a>
+        <button class="bouton bouton--contour bouton--large" type="button" data-vue="vue-connexion">Retour à la connexion</button>
+      </div>
+
+      <p class="note auth__demo">Démonstration : aucun compte n’est créé, aucun e-mail n’est envoyé et aucun mot de passe n’est vérifié.</p>
+      <div class="rangee entre"><a class="lien" href="espace-charretier.html">Je suis charretier</a><a class="note" href="index.html">Retour au site</a></div>
+    </div>
+  </div>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/connexion.js"></script>
+</body>
+</html>

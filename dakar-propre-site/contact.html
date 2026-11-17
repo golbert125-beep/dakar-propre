@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact · Dakar Propre &amp; Inclusif</title>
+<meta name="description" content="Ménage, charretier, sponsor ou commune : écrivez à l’association Éco-Innov Dakar.">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-gabarit="site" data-page="contact">
+<main>
+  <section class="section">
+    <div class="duo" style="--droite:560px; align-items:start">
+      <div class="pile">
+        <p class="surtitre">Contact</p>
+        <h1 style="font-size:clamp(2.6rem,6vw,5.25rem)">Parlons-en.</h1>
+        <p class="chapo">Ménage, charretier, sponsor ou commune : dites-nous qui vous êtes, nous revenons vers vous.</p>
+        <!-- À COMPLÉTER : remplacer « À renseigner » par les vraies coordonnées de l'association. -->
+        <dl class="lignes" style="margin:0">
+          <div class="entre"><dt class="surtitre">WhatsApp</dt><dd class="note" style="margin:0">À renseigner</dd></div>
+          <div class="entre"><dt class="surtitre">Téléphone</dt><dd class="note" style="margin:0">À renseigner</dd></div>
+          <div class="entre"><dt class="surtitre">E-mail</dt><dd class="note" style="margin:0">À renseigner</dd></div>
+        </dl>
+      </div>
+      <div>
+        <form class="carte pile" id="formulaire" style="--pile:22px; box-shadow:var(--ombre)">
+          <label class="champ"><span>Nom</span><input name="nom" autocomplete="name" placeholder="Votre nom" required></label>
+          <label class="champ"><span>Téléphone</span><input name="tel" type="tel" autocomplete="tel" placeholder="Votre numéro" required></label>
+          <fieldset class="champ" style="border:0; padding:0; margin:0"><span>Vous êtes</span>
+            <div class="choix">
+              <label><input type="radio" name="profil" value="Ménage"><span>Ménage</span></label>
+              <label><input type="radio" name="profil" value="Charretier"><span>Charretier</span></label>
+              <label><input type="radio" name="profil" value="Sponsor" checked><span>Sponsor</span></label>
+              <label><input type="radio" name="profil" value="Commune"><span>Commune</span></label>
+            </div>
+          </fieldset>
+          <label class="champ"><span>Message</span><textarea name="message" placeholder="Votre message"></textarea></label>
+          <button class="bouton bouton--primaire bouton--large" type="submit">Envoyer</button>
+        </form>
+        <div class="carte carte--foret pile cache" id="envoye" style="text-align:center; justify-items:center; padding-block:56px; box-shadow:var(--ombre)" role="status" tabindex="-1">
+          <span class="pastille" style="background:var(--soleil); color:var(--encre); width:88px; height:88px; margin-inline:auto"><i data-ic="check"></i></span>
+          <h2 style="font-size:2.75rem">Message envoyé.</h2>
+          <p>Merci. L’équipe Éco-Innov Dakar vous recontacte.</p>
+          <a class="bouton bouton--clair" href="index.html">Retour à l’accueil</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+  /* Démonstration : le formulaire n'envoie rien. À brancher sur un service d'envoi (e-mail, WhatsApp, Formspree…). */
+  document.getElementById("formulaire").addEventListener("submit", function (e) {
+    e.preventDefault();
+    this.classList.add("cache");
+    var ok = document.getElementById("envoye");
+    ok.classList.remove("cache"); ok.focus();
+  });
+</script>
+</body>
+</html>

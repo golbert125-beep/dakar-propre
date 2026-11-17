@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fiche charretier · Dakar Propre &amp; Inclusif</title>
+<meta name="description" content="La fiche de votre charretier : son nom, sa zone, ses jours de passage.">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-gabarit="app" data-page="fiche">
+<main class="app">
+  <!-- Vue 1 : la fiche -->
+  <section class="app__colonne" id="vue-fiche">
+    <div class="rangee entre"><span data-logo="couleur"></span><span class="surtitre" style="font-size:10px; color:var(--gris)">Fiche charretier</span></div>
+    <div class="bloc bloc--foret identite sombre">
+      <div class="avatar" id="initiales">MS</div>
+      <span class="surtitre" style="font-size:10px">Votre charretier</span>
+      <h1 id="nom">Moussa Sarr</h1>
+      <span class="bandeau-label"><i data-symbole="blanc"></i><span id="numero">Charrette propre · N° 0042</span></span>
+      <span class="surtitre" style="font-size:10px; color:var(--vert-300)" id="zone">Zone Guédiawaye</span>
+    </div>
+    <div class="bloc"><span class="surtitre" style="font-size:10px">Jours de passage</span><i data-semaine></i><b style="font-size:15px">Prochain passage : <span id="prochain">mercredi</span></b></div>
+    <div class="bloc bloc--soleil bloc--ligne"><span class="pastille pastille--blanc" style="width:48px;height:48px"><i data-ic="sac"></i></span><div><span class="surtitre" style="font-size:10px; color:var(--encre)">Votre geste</span><p style="font-weight:700; font-size:15px">Bouteilles, plastiques et canettes dans le sac jaune.</p></div></div>
+    <div class="bloc bloc--ligne entre" style="display:flex"><span class="surtitre" style="font-size:10px; color:var(--gris)">Abonnement</span><b style="font-size:14px">Espèces ou Wave</b></div>
+    <button class="bouton bouton--large bouton-alerte pousse" type="button" data-vers="vue-signaler"><i data-ic="alerte"></i> Signaler un problème</button>
+    <a class="note" href="index.html" style="text-align:center">En savoir plus sur le projet</a>
+  </section>
+
+  <!-- Vue 2 : signaler -->
+  <section class="app__colonne cache" id="vue-signaler">
+    <div class="app__retour"><button class="rond" type="button" data-vers="vue-fiche" aria-label="Retour à la fiche"><i data-ic="flecheG"></i></button><span id="rappel">Moussa Sarr · N° 0042</span></div>
+    <h1>Que s’est-il passé ?</h1>
+    <div class="pile" style="--pile:12px" id="motifs">
+      <button class="bloc bloc--ligne option" type="button" aria-pressed="true" data-motif="Pas passé aujourd’hui"><span class="pastille"><i data-ic="bloque"></i></span><span><h3>Pas passé aujourd’hui</h3><p>Le charretier n’est pas venu au jour prévu.</p></span></button>
+      <button class="bloc bloc--ligne option" type="button" aria-pressed="false" data-motif="Déchets tombés dans la rue"><span class="pastille"><i data-ic="alerte"></i></span><span><h3>Déchets tombés dans la rue</h3><p>Des déchets sont restés après son passage.</p></span></button>
+      <button class="bloc bloc--ligne option" type="button" aria-pressed="false" data-motif="Autre"><span class="pastille"><i data-ic="points"></i></span><span><h3>Autre</h3><p>Dites-nous ce qui ne va pas.</p></span></button>
+    </div>
+    <label class="champ"><span class="sr">Un détail à ajouter</span><textarea id="detail" placeholder="Un détail à ajouter ? (facultatif)" style="background:var(--blanc); min-height:96px"></textarea></label>
+    <button class="bouton bouton--sombre bouton--large pousse" type="button" id="envoyer">Envoyer le signalement</button>
+  </section>
+
+  <!-- Vue 3 : confirmation -->
+  <section class="app__colonne confirmation cache" id="vue-ok">
+    <span class="grand-rond"><i data-ic="check"></i></span>
+    <h1>Signalement envoyé.</h1>
+    <p style="color:var(--gris)">L’association Éco-Innov Dakar est prévenue. Elle contacte votre charretier.</p>
+    <button class="bouton bouton--sombre bouton--large" type="button" data-vers="vue-fiche">Retour à la fiche</button>
+  </section>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/fiche.js"></script>
+</body>
+</html>

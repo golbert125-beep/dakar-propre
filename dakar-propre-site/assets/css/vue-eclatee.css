@@ -1,0 +1,82 @@
+/* Vue éclatée 3D de l’Éco-Charrette — styles isolés dans .ve */
+.ve{--bg:#F4EDE1; --stage:#FFFFFF; --panel:#FFFFFF; --fg:#0A1F17; --muted:#5F6F68; --line:#D9D3C7;
+  --accent:#0B3D2E; --accent-fg:#FFFFFF; --ground:#B9C4BD; --hover:#EEF8F2;
+  --tag-m-bg:#D5EEDF; --tag-m-fg:#0B3D2E; --tag-e-bg:#EDE6D9; --tag-e-fg:#5F6F68;
+  --logo-rim:#0B3D2E; --logo-leaf:#149E63; --logo-tri:#FFC42E; --brand2:#0E7A4C;
+  --display:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --text:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color:var(--fg);font-family:var(--text);font-size:15px;line-height:1.5}
+.ve .layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+@media (min-width:920px){.ve .layout{grid-template-columns:minmax(0,1fr) 380px;align-items:start;gap:28px}}
+.ve .viewer{display:flex;flex-direction:column;gap:12px;min-width:0}
+.ve .stage{
+  position:relative;height:clamp(380px,60vh,640px);border:1px solid var(--line);border-radius:20px;
+  background:var(--stage);overflow:hidden;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;
+}
+.ve .stage:active{cursor:grabbing}
+.ve .stage canvas{display:block;width:100%;height:100%}
+.ve .markers{position:absolute;inset:0;pointer-events:none}
+.ve .marker{
+  position:absolute;left:0;top:0;width:24px;height:24px;padding:0;border-radius:50%;
+  border:2px solid var(--stage);background:var(--accent);color:var(--accent-fg);
+  font:600 12px/1 var(--display);display:grid;place-items:center;cursor:pointer;pointer-events:auto;
+  transition:opacity .15s ease;
+}
+.ve .marker.on{outline:2px solid var(--fg);outline-offset:1px}
+.ve .marker.dim{opacity:.3}
+.ve .marker[hidden]{display:none}
+.ve .marker:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.ve .horse{
+  position:absolute;left:0;top:0;pointer-events:none;white-space:nowrap;
+  font:600 11px/1 var(--text);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+}
+.ve .scale{
+  position:absolute;left:12px;bottom:10px;font:500 12px/1.3 var(--text);color:var(--muted);pointer-events:none;
+}
+.ve .fallback{padding:24px;color:var(--muted)}
+.ve .controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px}
+.ve .slider{display:flex;align-items:center;gap:10px;flex:1 1 220px;min-width:0}
+.ve .slider label{font-weight:600;white-space:nowrap}
+.ve .slider input{flex:1;min-width:0;accent-color:var(--accent)}
+.ve .slider output{min-width:3.2ch;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.ve .btns{display:flex;flex-wrap:wrap;gap:8px}
+.ve .btn{
+  font:500 14px/1 var(--text);padding:10px 16px;border-radius:999px;border:1px solid var(--line);
+  background:var(--panel);color:var(--fg);cursor:pointer;
+}
+.ve .btn:hover{border-color:var(--accent)}
+.ve .btn:focus-visible,.ve .item:focus-visible,.ve .slider input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ve .hint{margin:0;color:var(--muted);font-size:13.5px}
+.ve .panel{min-width:0}
+.ve .key{margin:0 0 12px;color:var(--muted);font-size:13.5px;display:flex;flex-direction:column;gap:6px}
+.ve .key > span{display:flex;align-items:center;gap:8px}
+.ve .legend{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.ve .item{
+  display:grid;grid-template-columns:26px minmax(0,1fr);gap:12px;width:100%;text-align:left;
+  padding:12px 8px;border:0;border-bottom:1px solid var(--line);background:transparent;color:inherit;
+  font:inherit;cursor:pointer;
+}
+.ve .item:hover,.ve .item.on{background:var(--hover)}
+.ve .num{
+  width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-fg);
+  display:grid;place-items:center;font:600 12px/1 var(--display);margin-top:1px;
+}
+.ve .name{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-weight:600}
+.ve .desc{display:block;color:var(--muted);font-size:13.5px;margin-top:2px}
+.ve .tag{font:700 10.5px/1 var(--text);letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:999px}
+.ve .tag.module{background:var(--tag-m-bg);color:var(--tag-m-fg)}
+.ve .tag.ex{background:var(--tag-e-bg);color:var(--tag-e-fg)}
+.ve .tag.base{background:var(--tag-m-bg);color:var(--tag-m-fg)}
+.ve .tag.full{background:transparent;color:var(--tag-m-fg);box-shadow:inset 0 0 0 1px var(--tag-m-fg)}
+.ve .kits{display:flex;flex-direction:column;gap:8px}
+.ve .seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:999px;background:var(--panel);padding:4px;gap:3px;align-self:flex-start;max-width:100%}
+.ve .seg button{font:500 14px/1 var(--text);padding:9px 16px;border:0;border-radius:999px;background:transparent;color:var(--fg);cursor:pointer}
+.ve .seg button:hover{background:var(--hover)}
+.ve .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.ve .seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ve .modenote{margin:0;max-width:70ch}
+.ve .item.off{opacity:.4;cursor:default}
+.ve .item.off:hover{background:transparent}
+.ve .note{margin:14px 0 0;color:var(--muted);font-size:13.5px}
+@media (prefers-reduced-motion: reduce){.ve .marker{transition:none}}
+.ve h3{font-family:var(--display);font-weight:700;font-size:1.15rem;margin:0 0 6px}
